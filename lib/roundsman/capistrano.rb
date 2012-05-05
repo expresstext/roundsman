@@ -74,7 +74,8 @@ require 'tempfile'
     def ensure_roundsman_working_dir
       unless @ensured_roundsman_working_dir
         run "mkdir -p #{fetch(:roundsman_working_dir)}"
-        sudo "chown -R #{user} #{fetch(:roundsman_working_dir)}"
+        current_user = capture('whoami').strip!
+        sudo "chown -R #{current_user} #{fetch(:roundsman_working_dir)}"
         @ensured_roundsman_working_dir = true
       end
     end
@@ -121,8 +122,9 @@ require 'tempfile'
       desc "Installs the dependencies needed for Ruby"
       task :dependencies, :except => { :no_release => true } do
         ensure_supported_distro
-        sudo "aptitude -yq update"
-        sudo "aptitude -yq install #{fetch(:ruby_dependencies).join(' ')}"
+        package_manager = fetch(:package_manager) || 'apt-get'
+        sudo "#{package_manager} -yq update"
+        sudo "#{package_manager} -yq install #{fetch(:ruby_dependencies).join(' ')}"
       end
 
       desc "Checks if the ruby version installed matches the version specified"
