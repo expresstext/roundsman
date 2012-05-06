@@ -45,6 +45,7 @@ require 'tempfile'
 
     set_default :roundsman_working_dir, "/tmp/roundsman"
     set_default :stream_roundsman_output, true
+    set_default(:roundsman_user) { fetch(:user) rescue capture('whoami').strip }
     set_default :debug_chef, false
     set_default :package_manager, 'apt-get'
 
@@ -76,8 +77,7 @@ require 'tempfile'
     def ensure_roundsman_working_dir
       unless @ensured_roundsman_working_dir
         run "mkdir -p #{fetch(:roundsman_working_dir)}"
-        current_user = fetch(:user) rescue capture('whoami').strip
-        sudo "chown -R #{current_user} #{fetch(:roundsman_working_dir)}"
+        sudo "chown -R #{fetch(:roundsman_user)} #{fetch(:roundsman_working_dir)}"
         @ensured_roundsman_working_dir = true
       end
     end
